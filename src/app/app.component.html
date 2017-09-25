@@ -1,20 +1,76 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{title}}!
-  </h1>
-  <img width="300" src="data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4NCjwhLS0gR2VuZXJhdG9yOiBBZG9iZSBJbGx1c3RyYXRvciAxOS4xLjAsIFNWRyBFeHBvcnQgUGx1Zy1JbiAuIFNWRyBWZXJzaW9uOiA2LjAwIEJ1aWxkIDApICAtLT4NCjxzdmcgdmVyc2lvbj0iMS4xIiBpZD0iTGF5ZXJfMSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgeD0iMHB4IiB5PSIwcHgiDQoJIHZpZXdCb3g9IjAgMCAyNTAgMjUwIiBzdHlsZT0iZW5hYmxlLWJhY2tncm91bmQ6bmV3IDAgMCAyNTAgMjUwOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+DQo8c3R5bGUgdHlwZT0idGV4dC9jc3MiPg0KCS5zdDB7ZmlsbDojREQwMDMxO30NCgkuc3Qxe2ZpbGw6I0MzMDAyRjt9DQoJLnN0MntmaWxsOiNGRkZGRkY7fQ0KPC9zdHlsZT4NCjxnPg0KCTxwb2x5Z29uIGNsYXNzPSJzdDAiIHBvaW50cz0iMTI1LDMwIDEyNSwzMCAxMjUsMzAgMzEuOSw2My4yIDQ2LjEsMTg2LjMgMTI1LDIzMCAxMjUsMjMwIDEyNSwyMzAgMjAzLjksMTg2LjMgMjE4LjEsNjMuMiAJIi8+DQoJPHBvbHlnb24gY2xhc3M9InN0MSIgcG9pbnRzPSIxMjUsMzAgMTI1LDUyLjIgMTI1LDUyLjEgMTI1LDE1My40IDEyNSwxNTMuNCAxMjUsMjMwIDEyNSwyMzAgMjAzLjksMTg2LjMgMjE4LjEsNjMuMiAxMjUsMzAgCSIvPg0KCTxwYXRoIGNsYXNzPSJzdDIiIGQ9Ik0xMjUsNTIuMUw2Ni44LDE4Mi42aDBoMjEuN2gwbDExLjctMjkuMmg0OS40bDExLjcsMjkuMmgwaDIxLjdoMEwxMjUsNTIuMUwxMjUsNTIuMUwxMjUsNTIuMUwxMjUsNTIuMQ0KCQlMMTI1LDUyLjF6IE0xNDIsMTM1LjRIMTA4bDE3LTQwLjlMMTQyLDEzNS40eiIvPg0KPC9nPg0KPC9zdmc+DQo=">
+<div class="chat_window">
+    <div class="top_menu">
+        <!--         <div class="buttons">
+            <div class="button close"></div>
+            <div class="button minimize"></div>
+            <div class="button maximize"></div>
+        </div>
+ -->
+        <div class="title">小卡 Chat</div>
+    </div>
+    <ul class="messages" #scrollMe [style.height.px]="getHeight()">
+        <li class="message appeared" *ngFor="let message of messageArray" [ngClass]="{'left': message.message_side=='left', 'right': message.message_side=='right'}">
+            <div class="avatar"></div>
+            <div class="text_wrapper" *ngIf="message.message_type=='normal'">
+                <div class="text">{{message.text}}</div>
+            </div>
+            <div class="text_wrapper multi_container" *ngIf="message.message_type=='list'">
+                <div class="contents" *ngFor="let hotel of message.hotelObjects">
+                    <div style="word-wrap: break-word;word-break: normal;white-space: normal; ">
+                        {{hotel.content.title}}
+                    </div>
+                    <div style="float: right;width: 66px;height: 66px;overflow: hidden;">
+                        <img src="{{hotel.content.images[0].url}}">
+                    </div>
+                    <div>
+                        {{hotel.content.text}}
+                    </div>
+                    <div>
+                        {{hotel.content.subtitle}}
+                    </div>
+                    <a href="javascript:void(0)" (click)="buynow()"><small>book now</small></a>
+                </div>
+            </div>
+        </li>
+    </ul>
+    <form>
+        <div class="bottom_wrapper clearfix">
+            <div class="message_input_wrapper">
+                <input class="message_input" placeholder="Type your message here..." type="text" [(ngModel)]="inputText" name="first" />
+                <button (click)="sendMessageClick()"></button>
+            </div>
+            <div class="send_message" (click)="sendMessageClick()">
+                <div class="icon"></div>
+                <div class="text">Send</div>
+            </div>
+            <div class="message_template" (click)="messageTemplate()">
+                <div class="icon"></div>
+                <div class="text">&nbsp;</div>
+            </div>
+            <div *ngIf="showTemplate">
+                <div class="template_container">
+                    <div class="template_contents" *ngFor="let city of cityList;let i=index" (click)="selectCity(i)">
+                        <a href="javascript:void(0)" ><small>{{city}}</small></a>
+                    </div>
+                </div>
+                <div class="template_container">
+                    <div class="template_contents" *ngFor="let city of cityList;let i=index" (click)="selectCity(i)">
+                        <a href="javascript:void(0)" ><small>{{city}}</small></a>
+                    </div>
+                    <div style="height: 1rem">
+                    </div>
+                </div>
+                <div >
+                    <input class="date_input" #drp="bsDaterangepicker" bsDaterangepicker placeholder="Check-in ~ Check-out" 
+                    [(bsValue)]="bsRangeValue">
+                </div>
+            </div>
+            <!--             <ul style="background-color: red" *ngIf="showTemplate">
+                <li *ngFor="let item of templateArray;let i=index">
+                    <div (click)="selectTemplate(i)">{{item}}</div>
+                </li>
+            </ul>
+ -->
+        </div>
+    </form>
 </div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" href="http://angularjs.blogspot.com/">Angular blog</a></h2>
-  </li>
-</ul>
-
