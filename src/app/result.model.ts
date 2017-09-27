@@ -34,9 +34,10 @@ export class ChatResponse{
    text : string;
    inputHint : string;
    replyToId : string;
+   attachments:any[];
 }
 
 export class ReceiveMessage {
   activities : ChatResponse[];
-  watermark: string;
+  watermark: string;  
 }

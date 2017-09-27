@@ -1,35 +1,50 @@
-<div class="chat_window">
-    <div class="top_menu">
-        <!--         <div class="buttons">
+<div class="chat_window" (window:resize)="windowSize($event)">
+    <!--     <div class="top_menu">
+                <div class="buttons">
             <div class="button close"></div>
             <div class="button minimize"></div>
             <div class="button maximize"></div>
         </div>
- -->
+
         <div class="title">小卡 Chat</div>
     </div>
+ -->
     <ul class="messages" #scrollMe [style.height.px]="getHeight()">
         <li class="message appeared" *ngFor="let message of messageArray" [ngClass]="{'left': message.message_side=='left', 'right': message.message_side=='right'}">
-            <div class="avatar"></div>
+            <div class="avatar" *ngIf="message.message_type=='normal'"></div>
             <div class="text_wrapper" *ngIf="message.message_type=='normal'">
-                <div class="text">{{message.text}}</div>
+                <div class="text" *ngIf="message.textArray.length==0">{{message.text}}</div>
+                <div class="text" *ngIf="message.textArray.length>0">
+                    <span *ngFor="let textObject of message.textArray">
+                        <span *ngIf="textObject.type==0">
+                            {{textObject.text}}
+                        </span>
+                    <a href="javascript:void(0)" *ngIf="textObject.type==1" (click)="messageTemplate()">
+                        <U>{{textObject.text}}</U>
+                    </a>
+                    <a href="javascript:void(0)" *ngIf="textObject.type==2" (click)="dpsss.show()">
+                        <U>{{textObject.text}}</U>
+                    </a>
+                    </span>
+                </div>
             </div>
-            <div class="text_wrapper multi_container" *ngIf="message.message_type=='list'">
+            <div class="multi_container" *ngIf="message.message_type=='list'">
                 <div class="contents" *ngFor="let hotel of message.hotelObjects">
-                    <div style="word-wrap: break-word;word-break: normal;white-space: normal; ">
+                    <div style="margin-top: 8px;margin-left: 8px;margin-right: 8px;height: 158px;overflow: hidden;">
+                        <img src="{{hotel.content.images[0].url}}" style="width:100%;height:auto;">
+                    </div>
+                    <div style="word-wrap: break-word;word-break: normal;white-space: normal;margin-left: 5px;margin-top:6px;font-size: 1.1rem">
                         {{hotel.content.title}}
                     </div>
-                    <div style="float: right;width: 66px;height: 66px;overflow: hidden;">
-                        <img src="{{hotel.content.images[0].url}}">
-                    </div>
-                    <div>
-                        {{hotel.content.text}}
-                    </div>
-                    <div>
+                    <div style="word-wrap: break-word;word-break: normal;white-space: normal;color: gray;margin-left: 5px;margin-top:-2px;">
                         {{hotel.content.subtitle}}
                     </div>
-                    <a href="javascript:void(0)" (click)="buynow()"><small>book now</small></a>
-                </div>
+                    <div style="word-wrap: break-word;word-break: normal;white-space: normal;margin-left: 5px;">
+                        {{hotel.content.text}}
+                    </div>
+                    <button style="color:blue;margin-top: 5px;margin-left: 5px;width: 295px;height: 36px;border:1px solid gray;background-color: white">{{hotel.content.buttons.title}}</button>
+                    <!--                     <a href="javascript:void(0)" (click)="buynow()" style="width:200px !important;padding: 5px;height: 32px; border: 1px solid gray">book now</a>
+ --></div>
             </div>
         </li>
     </ul>
@@ -41,7 +56,7 @@
             </div>
             <div class="send_message" (click)="sendMessageClick()">
                 <div class="icon"></div>
-                <div class="text">Send</div>
+                <div class="text">&nbsp;</div>
             </div>
             <div class="message_template" (click)="messageTemplate()">
                 <div class="icon"></div>
@@ -49,22 +64,22 @@
             </div>
             <div *ngIf="showTemplate">
                 <div class="template_container">
-                    <div class="template_contents" *ngFor="let city of cityList;let i=index" (click)="selectCity(i)">
-                        <a href="javascript:void(0)" ><small>{{city}}</small></a>
+                    <div class="template_contents" *ngFor="let city of cityListAU;let i=index" (click)="selectCity(city)">
+                        <a href="javascript:void(0)"><small>{{city}}</small></a>
                     </div>
                 </div>
                 <div class="template_container">
-                    <div class="template_contents" *ngFor="let city of cityList;let i=index" (click)="selectCity(i)">
-                        <a href="javascript:void(0)" ><small>{{city}}</small></a>
+                    <div class="template_contents" *ngFor="let city of cityListNZ;let i=index" (click)="selectCity(city)">
+                        <a href="javascript:void(0)"><small>{{city}}</small></a>
                     </div>
                     <div style="height: 1rem">
                     </div>
                 </div>
-                <div >
-                    <input class="date_input" #drp="bsDaterangepicker" bsDaterangepicker placeholder="Check-in ~ Check-out" 
-                    [(bsValue)]="bsRangeValue">
+                <div>
+                    <input class="date_input" bsDaterangepicker #dpr="bsDaterangepicker" placeholder="Check-in ~ Check-out" [(bsValue)]="bsRangeValue" [minDate]="minDate">
                 </div>
             </div>
+            <input class="date_input" bsDaterangepicker #dpsss="bsDaterangepicker" placeholder="Check-in ~ Check-out" [(bsValue)]="bsRangeValue" style="visibility: hidden;position: absolute;0" [minDate]="minDate">
             <!--             <ul style="background-color: red" *ngIf="showTemplate">
                 <li *ngFor="let item of templateArray;let i=index">
                     <div (click)="selectTemplate(i)">{{item}}</div>
