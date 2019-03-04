@@ -12,7 +12,7 @@ div[data-info|=name] {
 }
 
 .multi_container {
-    width: calc(100vw - 20px);
+    max-width: calc(100vw - 20px);
     background-color: rgb(233,236,239);
     overflow: auto;
     min-height: 320px;

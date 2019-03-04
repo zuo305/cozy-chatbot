@@ -9,6 +9,7 @@
         <div class="title">小卡 Chat</div>
     </div>
  -->
+ 
     <ul class="messages" #scrollMe [style.height.px]="getHeight()">
         <li class="message appeared" *ngFor="let message of messageArray" [ngClass]="{'left': message.message_side=='left', 'right': message.message_side=='right'}">
             <div class="avatar" *ngIf="message.message_type=='normal'"></div>
@@ -42,7 +43,7 @@
                     <div style="word-wrap: break-word;word-break: normal;white-space: normal;margin-left: 5px;">
                         {{hotel.content.text}}
                     </div>
-                    <button style="color:blue;margin-top: 5px;margin-left: 5px;width: 295px;height: 36px;border:1px solid gray;background-color: white">{{hotel.content.buttons.title}}</button>
+                    <button style="color:blue;margin-top: 5px;margin-left: 5px;width: 295px;height: 36px;border:1px solid gray;background-color: white" *ngIf="hotel.content.buttons && hotel.content.buttons.length>0"  (click)="commandSend(hotel.content.buttons[0].value,hotel.content.title)">{{hotel.content.buttons[0].title}}</button>
                     <!--                     <a href="javascript:void(0)" (click)="buynow()" style="width:200px !important;padding: 5px;height: 32px; border: 1px solid gray">book now</a>
  --></div>
             </div>

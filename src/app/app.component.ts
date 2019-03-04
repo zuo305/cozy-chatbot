@@ -50,7 +50,7 @@ export class AppComponent {
   title = 'app';
   public inputText = '';
   public messageArray = [];
-  public chatConnectBody : ChatConnectBody;
+  public chatConnectBody : ChatConnectBody = null;
   public recognition;
 
   public minDate = new Date();
@@ -61,7 +61,7 @@ export class AppComponent {
 
   public showTemplate = false;
 
-  public supportSpeech = true;
+  public supportSpeech = false;
 
   public mobile = false;
 
@@ -95,7 +95,8 @@ export class AppComponent {
             "buttons": [
               {
                 "type": "postBack",
-                "title": "选择"
+                "title": "选择",
+                "value": "action?confirmHotelAction={\"name\":\"悉尼达令港索菲特酒店\",\"hotelUuid\":\"ab50a2c4-6252-43c8-9513-beddb71e8962\"}"
               }
             ]
           }
@@ -247,6 +248,7 @@ export class AppComponent {
         this.chatConnectBody= result;
         },
          err => {
+           console.log(err);
         }
     );
 
@@ -385,6 +387,7 @@ export class AppComponent {
                  if(textArray.length<=1)
                  {
                    var message = new Message(response.text,'left',watermark);
+                   message.text = that.dateFormatService.replaceAll("<br>","",message.text);
                    that.messageArray.push(message);
                  }
                  else
@@ -395,7 +398,7 @@ export class AppComponent {
                }
                else if(response.attachments && response.attachments.length>0)
                {
-                 var message = new Message("亲，帮您找到这些房间",'left',watermark);
+                 var message = new Message("亲，帮您找到这些",'left',watermark);
                  that.messageArray.push(message);
 
                  var message = new Message("",'left',watermark,"list",response.attachments);
@@ -418,7 +421,7 @@ export class AppComponent {
   splitText(str) 
   {
     var newStr = str;
-    var array = str.split(/(悉尼|城市)/);
+    var array = str.split(/(悉尼|城市|\d\d\d\d.\d\d.\d\d - \d\d\d\d.\d\d.\d\d|入住时间|退房时间|入住日期|退房日期)/);
     var textArray = [];
     if(array.length>1)
     {
@@ -428,80 +431,28 @@ export class AppComponent {
         {
            newStr = array[i];
         }
-        else if(i==1)
+        else if(i>0)
         {
-           newStr += '^'+array[i]+'^';
-        }
-        else if(i==2)
-        {
-           newStr +=array[i];
+           newStr += '^'+array[i];
         }
       }
     }
 
-    array = newStr.split(/(\d\d\d\d.\d\d.\d\d - \d\d\d\d.\d\d.\d\d)/);
-    if(array.length>1)
-    {
-        newStr = '';
-        for(var i=0;i<array.length;i++)
-        {
-          if(i==0)
-          {
-             newStr = array[i];
-          }
-          else if(i==1)
-          {
-             newStr += '^'+array[i]+'^';
-          }
-          else if(i==2)
-          {
-             newStr +=array[i];
-          }
-        }        
-    }
 
-    array = newStr.split(/(入住时间|入住日期)/);
-    if(array.length>1)
-    {
-        newStr = '';
-        for(var i=0;i<array.length;i++)
-        {
-          if(i==0)
-          {
-             newStr = array[i];
-          }
-          else if(i==1)
-          {
-             newStr += '^'+array[i]+'^';
-          }
-          else if(i==2)
-          {
-             newStr +=array[i];
-          }
-        }        
-    }
 
 
     array = newStr.split('^');
     for(var i=0;i<array.length;i++)
     {
-      if(array[i].search(/(悉尼|城市)/)>=0 )
+      if(array[i].search(/悉尼|城市/)>=0 )
       {
         textArray.push(new textObject(array[i],1));
       }
-      else if(array[i].search(/(\d\d\d\d-\d\d-\d\d - \d\d\d\d-\d\d-\d\d)/)>=0)
+      else if(array[i].search(/入住时间|退房时间|入住日期|退房日期|\d\d\d\d(.)\d\d(.)\d\d - \d\d\d\d(.)\d\d(.)\d\d/)>=0)
       {
         textArray.push(new textObject(array[i],2));
       }
-      else if(array[i].search(/(\d\d\d\d(.)\d\d(.)\d\d - \d\d\d\d(.)\d\d(.)\d\d)/)>=0)
-      {
-        textArray.push(new textObject(array[i],2));
-      }
-      else if(array[i].search(/(入住时间|入住日期)/)>=0)
-      {
-        textArray.push(new textObject(array[i],2));
-      }
-      else if(array[i].length>0)
+      else
       {
         textArray.push(new textObject(array[i],0));
       }
@@ -534,6 +485,35 @@ export class AppComponent {
 //    this.inputText += this.cityList[index];
   }
 
+
+  commandSend(commandText,hotelName)
+  {
+    var message = new Message(hotelName,'right',-1);
+    this.messageArray.push(message);
+
+    let sendRequest = new SendRequest();
+    sendRequest.type = 'message';
+    sendRequest.from = {'id': 'user1'};
+    sendRequest.text = commandText;
+
+
+    this.chatBotService.sendMessage(sendRequest,this.chatConnectBody.conversationId).timeout(120000).subscribe(result =>  { 
+          console.log(result);
+          },
+           err => {
+          }
+        );       
+
+      this.receiveMessage();
+
+      let that = this;
+       setTimeout(function() {
+       try {
+               that.myScrollContainer.nativeElement.scrollTop = that.myScrollContainer.nativeElement.scrollHeight;
+           } catch(err) { }    
+       }, 30);    
+  }
+
   sendMessageClick(clear = true,text='') {
 
     let sendText = '';
@@ -545,6 +525,8 @@ export class AppComponent {
 
     if(sendText.length<=0)
       return;
+
+
 
   	console.log(sendText);
   	var message = new Message(sendText,'right',-1);
